@@ -12,7 +12,9 @@ Import an image, preview it, then:
 
 Every operation is in both the menu bar and the toolbar. The window resizes freely, the toolbar wraps on narrow screens, and View > Full Screen (F11, or Ctrl+Cmd+F on macOS) fills the monitor.
 
-## Download
+## Download (recommended)
+
+The easiest way to run Image Studio is the ready-made `ImageStudio.jar`. No compiling needed.
 
 1. Install Java 21 or newer if you don't have it. Get it free from [adoptium.net](https://adoptium.net).
    Check with `java -version` in a terminal.
@@ -33,6 +35,8 @@ Using the app:
 4. Click Save to keep the result.
 
 ## How to run from source
+
+Only needed if you want to build it yourself. Otherwise use the download above.
 
 You only need a JDK (21 or newer). No libraries.
 
