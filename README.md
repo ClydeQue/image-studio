@@ -12,7 +12,13 @@ Import an image, preview it, then:
 
 Every operation is in both the menu bar and the toolbar. The window resizes freely, the toolbar wraps on narrow screens, and View > Full Screen (F11, or Ctrl+Cmd+F on macOS) fills the monitor.
 
-## How to run
+## Download
+
+Get `ImageStudio.jar` from the [latest release](https://github.com/ClydeQue/image-studio/releases/latest) and double-click it. Needs Java 21 or newer installed.
+
+If double-clicking does nothing, run `java -jar ImageStudio.jar`.
+
+## How to run from source
 
 You only need a JDK (21 or newer). No libraries.
 
