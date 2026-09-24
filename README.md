@@ -14,9 +14,23 @@ Every operation is in both the menu bar and the toolbar. The window resizes free
 
 ## Download
 
-Get `ImageStudio.jar` from the [latest release](https://github.com/ClydeQue/image-studio/releases/latest) and double-click it. Needs Java 21 or newer installed.
+1. Install Java 21 or newer if you don't have it. Get it free from [adoptium.net](https://adoptium.net).
+   Check with `java -version` in a terminal.
+2. Download `ImageStudio.jar` from the [latest release](https://github.com/ClydeQue/image-studio/releases/latest).
+3. Double-click `ImageStudio.jar`.
 
-If double-clicking does nothing, run `java -jar ImageStudio.jar`.
+If it doesn't open:
+
+- macOS says it can't be opened: right-click the file, choose Open, then Open again.
+- Windows opens it as a zip, or nothing happens: open Command Prompt in the Downloads folder and run
+  `java -jar ImageStudio.jar`
+
+Using the app:
+
+1. Click Import and pick an image.
+2. Pick a grayscale method: Average, Luminosity or Lightness.
+3. Click Flip Horizontal or Flip Vertical.
+4. Click Save to keep the result.
 
 ## How to run from source
 
