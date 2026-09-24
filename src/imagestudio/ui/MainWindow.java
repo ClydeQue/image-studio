@@ -64,8 +64,11 @@ public final class MainWindow extends JFrame implements StudioController.Listene
         installCompareKeyBinding();
 
         stateChanged();                          // start with everything in step
-        setSize(1100, 740);
-        setMinimumSize(new Dimension(820, 560));
+        // Lets the macOS green title bar button enter full screen. Ignored elsewhere.
+        getRootPane().putClientProperty("apple.awt.fullscreenable", true);
+
+        setSize(1200, 760);
+        setMinimumSize(new Dimension(640, 480));   // the toolbar wraps, so it can go narrow
         setLocationRelativeTo(null);
     }
 

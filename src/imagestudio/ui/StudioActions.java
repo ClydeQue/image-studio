@@ -3,6 +3,8 @@ package imagestudio.ui;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
+import java.awt.Frame;
+import java.awt.GraphicsDevice;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -38,6 +40,7 @@ final class StudioActions {
     final Action actualSize;
     final Action zoomIn;
     final Action zoomOut;
+    final Action fullScreen;
     final Action exit;
     final Action formulas;
     final Action about;
@@ -73,6 +76,9 @@ final class StudioActions {
                 KeyEvent.VK_U, KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, MENU_MASK),
                 e -> preview.zoomOut());
 
+        fullScreen = build("Full Screen", "Fill the whole screen with the window, choose again to leave",
+                KeyEvent.VK_S, fullScreenKey(), e -> toggleFullScreen(owner));
+
         exit = build("Exit", "Close the program",
                 KeyEvent.VK_X, KeyStroke.getKeyStroke(KeyEvent.VK_Q, MENU_MASK),
                 e -> owner.dispose());
@@ -90,6 +96,36 @@ final class StudioActions {
         bindings.bindActionNeedsImage(actualSize);
         bindings.bindActionNeedsImage(zoomIn);
         bindings.bindActionNeedsImage(zoomOut);
+    }
+
+    /**
+     * The usual full screen shortcut for the platform: Ctrl+Cmd+F on macOS,
+     * the way every Mac app does it, and F11 on Windows and Linux.
+     */
+    private static KeyStroke fullScreenKey() {
+        boolean mac = System.getProperty("os.name", "").toLowerCase().contains("mac");
+        return mac
+                ? KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK | KeyEvent.META_DOWN_MASK)
+                : KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0);
+    }
+
+    /**
+     * Switches the window in and out of full screen.
+     * <p>
+     * True full screen hands the whole monitor to the window. Some systems,
+     * such as a remote desktop or a headless test, do not support it, so there
+     * the window is maximised instead, which is the closest thing available.
+     */
+    private static void toggleFullScreen(Window window) {
+        GraphicsDevice screen = window.getGraphicsConfiguration().getDevice();
+        if (screen.isFullScreenSupported()) {
+            boolean isFull = screen.getFullScreenWindow() == window;
+            screen.setFullScreenWindow(isFull ? null : window);
+        } else if (window instanceof Frame frame) {
+            boolean isMax = (frame.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
+            frame.setExtendedState(isMax ? Frame.NORMAL : Frame.MAXIMIZED_BOTH);
+        }
+        window.validate();
     }
 
     private static Action build(String name, String tip, int mnemonic,

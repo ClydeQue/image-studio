@@ -2,15 +2,18 @@ package imagestudio.ui;
 
 import imagestudio.core.GrayscaleMethod;
 
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.SwingConstants;
+import java.awt.FlowLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -23,11 +26,14 @@ import java.awt.event.MouseEvent;
  *            also exists in the menu bar; both register with ControlBindings
  *            so neither can fall out of step with the other.
  *
- *  LAYOUT   : grouped into sections separated by rules, so related controls
- *            read as belonging together rather than as one long row of
- *            buttons. Import and Save, then the grayscale choice, then the
- *            flips, then compare and reset, with the view controls pushed to
- *            the far right where they are out of the way of the work.
+ *  LAYOUT   : grouped into sections with a gap between them, so related
+ *            controls read as belonging together rather than as one long row
+ *            of buttons. Import and Save, then the grayscale choice, then the
+ *            flips, then compare and reset, then the view controls.
+ *
+ *            The sections sit in a WrapLayout, so on a narrow window whole
+ *            sections move to a second row instead of running off the right
+ *            edge, and on a wide or full screen window they share one row.
  *
  *            Every button is made non-focusable. A toolbar button that takes
  *            focus would swallow the space bar, which this program uses for
@@ -41,73 +47,90 @@ final class ToolBarFactory {
     private ToolBarFactory() {
     }
 
-    static JToolBar build(StudioController controller, StudioActions actions,
-                          ControlBindings bindings) {
-        JToolBar bar = new JToolBar();
-        bar.setFloatable(false);
-        bar.setOpaque(true);
+    static JComponent build(StudioController controller, StudioActions actions,
+                            ControlBindings bindings) {
+        JPanel bar = new JPanel(new WrapLayout(FlowLayout.LEFT, Theme.SPACE_3, Theme.SPACE_1));
         bar.setBackground(Theme.SURFACE);
         bar.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER),
-                BorderFactory.createEmptyBorder(Theme.SPACE_2, Theme.SPACE_3,
-                        Theme.SPACE_2, Theme.SPACE_3)));
+                BorderFactory.createEmptyBorder(Theme.SPACE_1, 0, Theme.SPACE_1, 0)));
 
-        bar.add(toolButton(actions.importImage, "Import"));
-        bar.add(Box.createHorizontalStrut(Theme.SPACE_1));
-        bar.add(toolButton(actions.save, "Save"));
+        JPanel file = group();
+        file.add(toolButton(actions.importImage, "Import"));
+        file.add(toolButton(actions.save, "Save"));
+        bar.add(file);
 
-        bar.add(separator());
-        bar.add(caption("Grayscale:"));
-        bar.add(Box.createHorizontalStrut(Theme.SPACE_2));
-        addGrayscaleButtons(bar, controller, bindings);
+        JPanel grayscale = group();
+        grayscale.add(caption("Grayscale:"));
+        addGrayscaleButtons(grayscale, controller, bindings);
+        bar.add(grayscale);
 
-        bar.add(separator());
-        addFlipButtons(bar, controller, bindings);
+        JPanel flips = group();
+        flips.add(caption("Flip:"));
+        addFlipButtons(flips, controller, bindings);
+        bar.add(flips);
 
-        bar.add(separator());
-        bar.add(compareButton(controller, bindings));
-        bar.add(Box.createHorizontalStrut(Theme.SPACE_1));
-        bar.add(toolButton(actions.reset, "Reset"));
+        JPanel edit = group();
+        edit.add(compareButton(controller, bindings));
+        edit.add(toolButton(actions.reset, "Reset"));
+        bar.add(edit);
 
-        bar.add(Box.createHorizontalGlue());
-        bar.add(toolButton(actions.fit, "Fit"));
-        bar.add(Box.createHorizontalStrut(Theme.SPACE_1));
-        bar.add(toolButton(actions.actualSize, "100%"));
+        JPanel view = group();
+        view.add(toolButton(actions.fit, "Fit"));
+        view.add(toolButton(actions.actualSize, "100%"));
+        bar.add(view);
+
+        // The wrap height depends on the width, so re-measure after every resize.
+        bar.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent event) {
+                bar.revalidate();
+            }
+        });
         return bar;
     }
 
+    /**
+     * One section of the toolbar. A section never splits across rows, so when
+     * the window is narrow whole groups wrap together and a label never ends
+     * up separated from its buttons.
+     */
+    private static JPanel group() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, Theme.SPACE_1, 0));
+        panel.setOpaque(false);
+        return panel;
+    }
+
     /** Same ButtonGroup idea as the menu, so one method is always showing. */
-    private static void addGrayscaleButtons(JToolBar bar, StudioController controller,
+    private static void addGrayscaleButtons(JPanel bar, StudioController controller,
                                             ControlBindings bindings) {
         ButtonGroup group = new ButtonGroup();
         for (GrayscaleMethod method : GrayscaleMethod.values()) {
             JToggleButton button = new JToggleButton(method.label());
             button.setToolTipText(method.formula() + "   (key " + method.accelerator() + ")");
-            button.setFocusable(false);
+            style(button);
             button.addActionListener(e -> controller.applyGrayscale(method));
             group.add(button);
             bar.add(button);
-            bar.add(Box.createHorizontalStrut(Theme.SPACE_1));
             bindings.bindGrayscale(method, button);
         }
     }
 
-    private static void addFlipButtons(JToolBar bar, StudioController controller,
+    private static void addFlipButtons(JPanel bar, StudioController controller,
                                        ControlBindings bindings) {
-        JToggleButton horizontal = new JToggleButton("Flip Horizontal");
+        JToggleButton horizontal = new JToggleButton("Flip Horizontal \u2194");
         horizontal.setToolTipText(
                 "Mirror left to right, reflecting across the vertical axis   (key H)");
-        horizontal.setFocusable(false);
+        style(horizontal);
         horizontal.addActionListener(e -> controller.toggleFlipHorizontal());
 
-        JToggleButton vertical = new JToggleButton("Flip Vertical");
+        JToggleButton vertical = new JToggleButton("Flip Vertical \u2195");
         vertical.setToolTipText(
                 "Mirror top to bottom, reflecting across the horizontal axis   (key V)");
-        vertical.setFocusable(false);
+        style(vertical);
         vertical.addActionListener(e -> controller.toggleFlipVertical());
 
         bar.add(horizontal);
-        bar.add(Box.createHorizontalStrut(Theme.SPACE_1));
         bar.add(vertical);
         bindings.bindFlipHorizontal(horizontal);
         bindings.bindFlipVertical(vertical);
@@ -122,7 +145,7 @@ final class ToolBarFactory {
     private static JButton compareButton(StudioController controller, ControlBindings bindings) {
         JButton button = new JButton("Compare");
         button.setToolTipText("Press and hold to see the original   (or hold the space bar)");
-        button.setFocusable(false);
+        style(button);
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent event) {
@@ -142,14 +165,39 @@ final class ToolBarFactory {
     private static JButton toolButton(Action action, String shortLabel) {
         JButton button = new JButton(action);
         button.setText(shortLabel);
-        button.setFocusable(false);
+        style(button);
         return button;
     }
 
-    private static JToolBar.Separator separator() {
-        JToolBar.Separator separator = new JToolBar.Separator();
-        separator.setOrientation(SwingConstants.VERTICAL);
-        return separator;
+    /**
+     * Gives a toolbar button a visible outline and fill on every look and feel.
+     * <p>
+     * A toolbar draws its buttons flat by default, so an unselected toggle
+     * showed as plain text and did not look clickable. Here every button gets
+     * an outline, and a selected or pressed one fills with the accent colour,
+     * so the chosen grayscale method and active flips can be seen at a glance.
+     * <p>
+     * The colours follow the button model, which also changes when
+     * ControlBindings selects or disables a button from the menu side, so the
+     * toolbar and the menu can never show different states.
+     */
+    private static void style(AbstractButton button) {
+        button.setFocusable(false);
+        button.setContentAreaFilled(false);          // stop the look and feel's flat paint
+        button.setOpaque(true);                      // ...and paint our own background
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Theme.BUTTON_OUTLINE),
+                BorderFactory.createEmptyBorder(Theme.BUTTON_PAD_Y, Theme.BUTTON_PAD_X,
+                        Theme.BUTTON_PAD_Y, Theme.BUTTON_PAD_X)));
+
+        Runnable paintState = () -> {
+            boolean on = button.isEnabled()
+                    && (button.isSelected() || button.getModel().isPressed());
+            button.setBackground(on ? Theme.ACCENT : Theme.SURFACE);
+            button.setForeground(on ? Theme.ON_ACCENT : Theme.TEXT);
+        };
+        button.getModel().addChangeListener(e -> paintState.run());
+        paintState.run();
     }
 
     private static JLabel caption(String text) {

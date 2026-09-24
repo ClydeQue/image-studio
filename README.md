@@ -10,7 +10,7 @@ Import an image, preview it, then:
 - Flip it horizontally or vertically
 - Save the result as PNG or JPG
 
-Every operation is in both the menu bar and the toolbar.
+Every operation is in both the menu bar and the toolbar. The window resizes freely, the toolbar wraps on narrow screens, and View > Full Screen (F11, or Ctrl+Cmd+F on macOS) fills the monitor.
 
 ## How to run
 
@@ -55,5 +55,9 @@ Flip horizontal and flip vertical
 
 ![Flip horizontal](screenshots/06-flip-horizontal.png)
 ![Flip vertical](screenshots/07-flip-vertical.png)
+
+Narrow window: the toolbar wraps instead of overflowing
+
+![Narrow window](screenshots/08-narrow-window.png)
 
 Saved output images are in `outputs/`.

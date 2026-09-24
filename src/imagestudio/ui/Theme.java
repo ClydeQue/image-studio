@@ -44,6 +44,10 @@ public final class Theme {
     public static final Color TEXT_MUTED = new Color(0x6B, 0x72, 0x80);
     /** The single accent colour. One is enough. */
     public static final Color ACCENT = new Color(0x2F, 0x6F, 0xED);
+    /** Text drawn on top of the accent colour, such as a selected button. */
+    public static final Color ON_ACCENT = Color.WHITE;
+    /** Outline of an unselected toolbar button, dark enough to read as a button. */
+    public static final Color BUTTON_OUTLINE = new Color(0xB8, 0xBE, 0xC8);
 
     /* ---------------------------- canvas ----------------------------------- */
 
@@ -64,6 +68,10 @@ public final class Theme {
     public static final int SPACE_2 = 8;
     public static final int SPACE_3 = 16;
     public static final int SPACE_4 = 24;
+
+    /** Inner padding of a toolbar button: vertical, then horizontal. */
+    public static final int BUTTON_PAD_Y = 5;
+    public static final int BUTTON_PAD_X = 8;
 
     /** Corner radius for the image card and the empty state. */
     public static final int RADIUS = 10;

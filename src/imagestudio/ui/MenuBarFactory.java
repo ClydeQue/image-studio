@@ -99,7 +99,7 @@ final class MenuBarFactory {
      * side and hoping the reader shares it.
      */
     private static JMenu transformMenu(StudioController controller, ControlBindings bindings) {
-        JMenu menu = new JMenu("Transform");
+        JMenu menu = new JMenu("Image Transformations");
         menu.setMnemonic(KeyEvent.VK_T);
 
         JCheckBoxMenuItem horizontal =
@@ -129,6 +129,8 @@ final class MenuBarFactory {
         menu.addSeparator();
         menu.add(new JMenuItem(actions.zoomIn));
         menu.add(new JMenuItem(actions.zoomOut));
+        menu.addSeparator();
+        menu.add(new JMenuItem(actions.fullScreen));
         return menu;
     }
 
