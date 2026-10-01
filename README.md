@@ -2,6 +2,10 @@
 
 A Java Swing program for basic image processing. Midterm project, Computer Science Department, Ateneo de Zamboanga University.
 
+## Ownership and authorship
+
+I'm Kenneth Clyde A. Que ([ClydeQue](https://github.com/ClydeQue)). I own this repository and wrote the Image Studio source code.
+
 ## Goal
 
 Import an image, preview it, then:
