@@ -1,29 +1,16 @@
 package imagestudio.ui;
 
+import imagestudio.core.ImageInfo;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
-/**
- * ============================================================================
- *  StatusBar
- *  ---------------------------------------------------------------------------
- *  PURPOSE : Answers, at a glance and at all times, the four questions someone
- *            using this program actually has: which file is open, how big it
- *            is, what has been applied to it, and what scale it is being shown
- *            at.
- *
- *            Keeping the user informed of system state is the first rule of
- *            interface design, and it is cheap to honour. The alternative is a
- *            window where the only way to know whether Luminosity is active is
- *            to look at a button and hope.
- *
- *  Author : Clyde
- * ============================================================================
- */
+// Estado ng larawan
 @SuppressWarnings("serial")
 final class StatusBar extends JPanel {
 
@@ -45,6 +32,7 @@ final class StatusBar extends JPanel {
         muted(size);
         muted(description);
         muted(zoom);
+        file.setMinimumSize(new Dimension(0, file.getPreferredSize().height));
 
         JPanel left = new JPanel();
         left.setOpaque(false);
@@ -55,11 +43,11 @@ final class StatusBar extends JPanel {
         left.add(Box.createHorizontalStrut(Theme.SPACE_3));
         left.add(description);
 
-        add(left, BorderLayout.WEST);
+        add(left, BorderLayout.CENTER);
         add(zoom, BorderLayout.EAST);
     }
 
-    /** Re-reads everything from the controller. Never holds state of its own. */
+    /* I-update ang status */
     void update(StudioController controller, String zoomLabel) {
         if (!controller.hasImage()) {
             file.setText("No image imported");
@@ -68,9 +56,12 @@ final class StatusBar extends JPanel {
             zoom.setText("");
             return;
         }
-        file.setText(controller.document().sourceName());
-        size.setText(controller.document().width() + " x " + controller.document().height());
+        ImageInfo image = controller.imageInfo();
+        file.setText(image.sourceName());
+        file.setToolTipText(image.sourceName());
+        size.setText(image.width() + " x " + image.height());
         description.setText(controller.statusDescription());
+        description.setToolTipText(controller.statusDescription());
         zoom.setText(zoomLabel);
     }
 

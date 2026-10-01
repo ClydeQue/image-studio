@@ -61,7 +61,50 @@ java -cp classes imagestudio.ImageStudio
 
 Try it with the sample image: `./run.sh test-images/color-chart.png`
 
-Run the checks: `java -cp classes imagestudio.verify.SelfTest`
+Run the image-operation checks: `./selftest.sh`
+
+Code structure:
+
+- `core/ImageDocument`: original image and selected edits.
+    - `core/ImageRecipe`: fixed settings captured before background rendering.
+    - `core/ImageInfo`: file details exposed to the UI without editable document state.
+- `core/GrayscaleMethod`: each enum constant provides its own grayscale formula.
+    - `core/ImageOps`: shared pixel operations.
+- `io/ImageFileService`: image reading and writing without Swing dialogs.
+    - `ui/ImageFileDialogs`: file selection and overwrite confirmation.
+- `ui/StudioController`: background work and view notifications.
+    - `ui/MainWindow`: assembles the interface.
+- `ui/StudioActions`: commands reused by the menu and toolbar.
+    - `ui/ControlBindings`: keeps their enabled and selected states in sync.
+
+The self-test checks formulas, flips, transparency, scaling and output filenames.
+It runs without opening the application window.
+
+Implementation notes:
+
+- Average: `(R + G + B) / 3`.
+    - Integer division drops the fractional part.
+- Luminosity: `(21 * R + 72 * G + 7 * B + 50) / 100`.
+    - The weights are `0.21`, `0.72` and `0.07`.
+    - Adding `50` rounds the result to the nearest whole level.
+- Lightness: `(max(R, G, B) + min(R, G, B)) / 2`.
+    - The middle channel does not affect the result.
+- Flip Horizontal: reverses columns across the vertical axis.
+    - Source column: `width - 1 - x`.
+- Flip Vertical: reverses rows across the horizontal axis.
+    - Source row: `height - 1 - y`.
+- Edits always start from the imported image.
+    - Switching grayscale methods preserves the original colour information.
+    - Applying the same flip twice cancels it.
+- Background workers receive a fixed recipe.
+    - Results from an older request are discarded.
+    - Save stays disabled while loading, rendering, saving or comparing the original.
+- Export writes a temporary file before replacing the destination.
+    - A failed encoder preserves the existing file.
+    - JPEG exports composite transparency onto white.
+- Preview scaling and export are separate.
+    - Zoom changes the displayed size.
+    - Export keeps the image's pixel dimensions.
 
 ## Screenshots
 

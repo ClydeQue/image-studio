@@ -6,27 +6,13 @@ import javax.swing.JTextArea;
 import java.awt.Component;
 import java.awt.Font;
 
-/**
- * ============================================================================
- *  HelpDialogs
- *  ---------------------------------------------------------------------------
- *  PURPOSE : The Help menu's two panels, text and presentation together, kept
- *            away from the window class.
- *
- *            A window should be busy with layout and wiring, not carrying a
- *            hundred lines of explanation. Putting the wording here makes it
- *            easy to find and edit without scrolling past Swing code to reach
- *            it, and means both panels are presented the same way.
- *
- *  Author : Clyde
- * ============================================================================
- */
+// Mga paliwanag
 final class HelpDialogs {
 
     private HelpDialogs() {
     }
 
-    /** The numbers quoted here are the real ones, checked by SelfTest. */
+    /* Nasuring mga formula */
     private static final String FORMULAS = """
             Every method turns three colour channels into one grey level, then
             writes that same level back into R, G and B.
@@ -91,8 +77,8 @@ final class HelpDialogs {
                 second conversion applied on top of the first.
 
             HOW IT IS BUILT
-                Java Swing, no required libraries. Every pixel operation is
-                written by hand in core/ImageOps.java, and each one is checked
+                Java Swing, no required libraries. Pixel operations are
+                implemented in core/ImageOps.java, and each one is checked
                 against values worked out on paper by verify/SelfTest.java.
             """;
 
@@ -104,7 +90,7 @@ final class HelpDialogs {
         show(owner, "About Image Studio", ABOUT);
     }
 
-    /** Monospaced, so the formulas line up the way they were written. */
+    /* Pantay na teksto */
     private static void show(Component owner, String title, String body) {
         JTextArea area = new JTextArea(body);
         area.setEditable(false);

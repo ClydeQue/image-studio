@@ -1,8 +1,6 @@
 #!/bin/sh
-# Compiles and runs Image Studio.
-# Picks up lib/flatlaf.jar for the modern look if it is there, and works fine
-# if it is not. An optional image path is passed straight through:
-#     ./run.sh test-images/color-chart.png
+# Patakbuhin ang app
+# Opsyonal na image
 set -e
 cd "$(dirname "$0")"
 
