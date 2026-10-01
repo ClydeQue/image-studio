@@ -1,3 +1,7 @@
+/*
+ * Owner and author: Kenneth Clyde A. Que (ClydeQue).
+ * I own this repository and wrote the Image Studio source code.
+ */
 package imagestudio;
 
 import imagestudio.ui.MainWindow;
