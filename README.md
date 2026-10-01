@@ -2,27 +2,17 @@
 
 A Java Swing program for basic image processing. Midterm project, Computer Science Department, Ateneo de Zamboanga University.
 
-## Ownership and authorship
+[![Download ImageStudio.jar](https://img.shields.io/badge/Download-ImageStudio.jar-2ea44f?style=for-the-badge)](https://github.com/ClydeQue/image-studio/releases/latest/download/ImageStudio.jar)
 
-I'm Kenneth Clyde A. Que ([ClydeQue](https://github.com/ClydeQue)). I own this repository and wrote the Image Studio source code.
+Compatibility: Java 21 or newer on Windows, macOS or Linux.
 
-## Goal
+## Download and run
 
-Import an image, preview it, then:
+The button above downloads the ready-made JAR. No compiling needed.
 
-- Convert it to grayscale with one of three methods: Average, Luminosity, Lightness
-- Flip it horizontally or vertically
-- Save the result as PNG or JPG
-
-Every operation is in both the menu bar and the toolbar. The window resizes freely, the toolbar wraps on narrow screens, and View > Full Screen (F11, or Ctrl+Cmd+F on macOS) fills the monitor.
-
-## Download (recommended)
-
-The easiest way to run Image Studio is the ready-made `ImageStudio.jar`. No compiling needed.
-
-1. Install Java 21 or newer if you don't have it. Get it free from [adoptium.net](https://adoptium.net).
-   Check with `java -version` in a terminal.
-2. Download `ImageStudio.jar` from the [latest release](https://github.com/ClydeQue/image-studio/releases/latest).
+1. Install Java 21 or newer from [Adoptium](https://adoptium.net) if needed.
+   Check your version with `java -version`.
+2. Click the download button above, or [download ImageStudio.jar here](https://github.com/ClydeQue/image-studio/releases/latest/download/ImageStudio.jar).
 3. Double-click `ImageStudio.jar`.
 
 If it doesn't open:
@@ -37,6 +27,19 @@ Using the app:
 2. Pick a grayscale method: Average, Luminosity or Lightness.
 3. Click Flip Horizontal or Flip Vertical.
 4. Click Save to keep the result.
+
+## Features
+
+- Import and preview an image.
+- Convert it to grayscale with Average, Luminosity or Lightness.
+- Flip it horizontally or vertically.
+- Save the result as PNG or JPG.
+
+Every operation is in both the menu bar and the toolbar. The window resizes freely, the toolbar wraps on narrow screens, and View > Full Screen (F11, or Ctrl+Cmd+F on macOS) fills the monitor.
+
+## Ownership and authorship
+
+I'm Kenneth Clyde A. Que ([ClydeQue](https://github.com/ClydeQue)). I own this repository and wrote the Image Studio source code.
 
 ## How to run from source
 
