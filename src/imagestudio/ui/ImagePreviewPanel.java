@@ -27,38 +27,7 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * ============================================================================
- *  ImagePreviewPanel
- *  ---------------------------------------------------------------------------
- *  PURPOSE : The image preview section required by the project. Painted by
- *            hand rather than being a JLabel with an icon, because it has to
- *            scale to fit, show transparency honestly, zoom while staying
- *            sharp, and accept a dropped file.
- *
- *            This class keeps only what genuinely belongs to a component: the
- *            image it shows, the zoom it shows it at, and the input it
- *            handles. The drawing lives in PreviewPainter and the scaling
- *            algorithm lives in core.ImageScaler, where it can be tested
- *            without a window.
- *
- *  THE RETINA DETAIL
- *            On a high-DPI display the Graphics2D handed to paintComponent
- *            already carries a 2x transform, so a "300 pixel wide" drawing
- *            really covers 600 device pixels. The scaler is therefore asked
- *            for the DEVICE size, read from that transform, and the last
- *            scaling step is left to drawImage. Reducing to the logical size
- *            first would throw away half the detail before anything is drawn.
- *
- *  Declared final so calling setOpaque and setBackground from the constructor
- *  is safe: with no possible subclass there is no half-built subclass for
- *  'this' to escape into. Swing components inherit Serializable but are never
- *  serialized, so that warning is suppressed rather than answered with a
- *  meaningless constant.
- *
- *  Author : Clyde
- * ============================================================================
- */
+// Preview ng larawan
 @SuppressWarnings("serial")
 public final class ImagePreviewPanel extends JPanel implements Scrollable {
 
@@ -67,7 +36,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
     private static final double ZOOM_STEP = 1.25;
     private static final Dimension DEFAULT_SIZE = new Dimension(760, 520);
 
-    /** Cmd on macOS, Ctrl on Windows and Linux. Held down, the wheel zooms. */
+    /* Shortcut sa zoom */
     private static final int MENU_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
     private final ImageScaler scaler = new ImageScaler();
@@ -77,7 +46,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
     private double zoom = 1.0;
     private boolean dragHovering;
 
-    /** Called with the dropped file when the user drags an image onto the panel. */
+    /* Handler ng drop */
     private Consumer<File> fileDropHandler;
 
     public ImagePreviewPanel() {
@@ -88,9 +57,8 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         installResizeReporting();
     }
 
-    /* ============================ PUBLIC API =============================== */
 
-    /** Shows a new image, or clears the panel when given null. */
+    /* Ipakita ang larawan */
     public void setImage(BufferedImage image) {
         this.image = image;
         scaler.clear();
@@ -99,7 +67,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         reportZoom();
     }
 
-    /** Fit mode scales the image down to sit inside the window. */
+    /* Kasya sa window */
     public void setFitToWindow(boolean fit) {
         if (this.fitToWindow != fit) {
             this.fitToWindow = fit;
@@ -113,7 +81,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         return fitToWindow;
     }
 
-    /** Leaves fit mode and pins the image at an exact scale. */
+    /* Itakda ang zoom */
     public void setZoom(double newZoom) {
         this.zoom = Math.clamp(newZoom, MIN_ZOOM, MAX_ZOOM);
         this.fitToWindow = false;
@@ -122,8 +90,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         reportZoom();
     }
 
-    /* Zooming starts from whatever is on screen now, so stepping in from fit
-       mode continues smoothly instead of jumping to 100% first. */
+    /* Tuloy na zoom */
     public void zoomIn() {
         setZoom(effectiveScale() * ZOOM_STEP);
     }
@@ -136,7 +103,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         setZoom(1.0);
     }
 
-    /** Readout for the status bar, for example "Fit (43%)" or "100%". */
+    /* Basa ng zoom */
     public String zoomLabel() {
         if (image == null) {
             return "-";
@@ -149,11 +116,10 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         this.fileDropHandler = handler;
     }
 
-    /* ============================ PAINTING ================================= */
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);                 // fills the dark canvas background
+        super.paintComponent(g);                 // Kulayan ang canvas
 
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -172,22 +138,19 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         g2.dispose();
     }
 
-    /** The image, sitting on a checkerboard card with a soft shadow under it. */
+    /* Larawan sa card */
     private void paintImageCard(Graphics2D g2) {
         Rectangle r = imageBounds();
 
         PreviewPainter.paintShadow(g2, r);
         PreviewPainter.paintCheckerboard(g2, r);
 
-        /* 2.0 on a Retina display, 1.0 otherwise. Reducing to the device size
-           keeps the full detail available for drawImage to use. */
+        /* Sukat sa display */
         double deviceScale = g2.getTransform().getScaleX();
         int targetW = (int) Math.ceil(r.width * deviceScale);
         int targetH = (int) Math.ceil(r.height * deviceScale);
 
-        /* Shrinking wants smooth interpolation. Enlarging wants hard pixel
-           edges, so zooming in to compare two grayscale methods shows the
-           actual pixels rather than a blur of them. */
+        /* Linaw ng pixels */
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                 effectiveScale() > 1.0
                         ? RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
@@ -202,9 +165,8 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         PreviewPainter.paintCardEdge(g2, r);
     }
 
-    /* ============================ GEOMETRY ================================= */
 
-    /** The scale actually in use: either the fitted scale or the pinned zoom. */
+    /* Kasalukuyang sukat */
     private double effectiveScale() {
         if (image == null) {
             return 1.0;
@@ -217,12 +179,11 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         double scale = Math.min(availableW / (double) image.getWidth(),
                 availableH / (double) image.getHeight());
 
-        /* Fit shrinks but never enlarges. Blowing a small image up to fill the
-           window would misrepresent it; Actual Size is there for a closer look. */
+        /* Paliitin lang larawan */
         return Math.min(1.0, scale);
     }
 
-    /** Where the image is drawn, centred, with the canvas padding respected. */
+    /* Gitna ng larawan */
     private Rectangle imageBounds() {
         double scale = effectiveScale();
         int w = Math.max(1, (int) Math.round(image.getWidth() * scale));
@@ -232,16 +193,8 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         return new Rectangle(x, y, w, h);
     }
 
-    /* ========================== INTERACTION ================================ */
 
-    /**
-     * Drop a file on the panel to open it. The empty state advertises this.
-     * <p>
-     * A DropTarget is used rather than a TransferHandler because it reports
-     * dragEnter and dragExit as well as the drop itself. Without those the
-     * panel could accept a file but give no sign it was going to, and a drop
-     * target that looks inert is one nobody trusts enough to use.
-     */
+    /* Tanggapin ang file */
     private void installDragAndDrop() {
         new DropTarget(this, new DropTargetAdapter() {
             @Override
@@ -275,11 +228,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
                     return;
                 }
 
-                /* The handler runs only after the drop has been closed out.
-                   Calling it inside the try would mean a failure in it reaches
-                   dropComplete a second time, and completing an already
-                   completed drop throws InvalidDnDOperationException from
-                   inside the catch, where nothing can report it. */
+                /* Tapusin muna drop */
                 if (dropped != null) {
                     fileDropHandler.accept(dropped);
                 }
@@ -294,11 +243,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         }
     }
 
-    /**
-     * Cmd or Ctrl plus the wheel zooms. A plain wheel is passed up to the
-     * scroll pane so it still scrolls, which is the behaviour every other
-     * application has trained people to expect.
-     */
+    /* Zoom gamit wheel */
     private void installWheelZoom() {
         addMouseWheelListener(event -> {
             boolean zooming = (event.getModifiersEx() & MENU_MASK) != 0;
@@ -317,11 +262,7 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         });
     }
 
-    /**
-     * In fit mode the scale is derived from the panel size, so resizing the
-     * window silently changes it. Without this the status bar would keep
-     * showing the percentage from before the drag.
-     */
+    /* I-update kapag resize */
     private void installResizeReporting() {
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -333,15 +274,12 @@ public final class ImagePreviewPanel extends JPanel implements Scrollable {
         });
     }
 
-    /* Old value is deliberately null so the change always fires: the label is
-       derived from several fields and comparing strings here would be fragile. */
+    /* Ibalita ang zoom */
     private void reportZoom() {
         firePropertyChange("zoomLabel", null, zoomLabel());
     }
 
-    /* =========================== SCROLLABLE ================================ */
-    /* Returning true from the tracks-viewport methods while fitting is what
-       makes the scroll bars disappear in fit mode and reappear when zoomed. */
+    /* Scrollbar kapag zoom */
 
     @Override
     public Dimension getPreferredSize() {

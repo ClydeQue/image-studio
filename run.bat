@@ -1,8 +1,6 @@
 @echo off
-REM Compiles and runs Image Studio.
-REM Picks up lib\flatlaf.jar for the modern look if it is there, and works fine
-REM if it is not. An optional image path is passed straight through:
-REM     run.bat test-images\color-chart.png
+REM Patakbuhin ang app
+REM Opsyonal na image
 cd /d "%~dp0"
 
 if not exist classes mkdir classes

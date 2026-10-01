@@ -15,36 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * ============================================================================
- *  SelfTest
- *  ---------------------------------------------------------------------------
- *  PURPOSE : Proves the image maths is correct, without any test framework.
- *
- *            Run it from the project folder:
- *                java -cp classes imagestudio.SelfTest
- *
- *            It does two jobs:
- *              1. Checks every formula against values worked out by hand, and
- *                 prints a PASS / FAIL table.
- *              2. Generates the colour chart in test-images/ and writes one
- *                 proof image per operation into outputs/, so the results can
- *                 be looked at and not just trusted.
- *
- *  WHY NO JUnit : it would mean shipping a 1.5 MB jar and a classpath step for
- *            a program that otherwise needs neither. A printed table that
- *            anyone can run and read is better evidence here than a test run
- *            somebody else cannot execute.
- *
- *  WHY A COLOUR CHART : on an ordinary photograph the three grayscale methods
- *            land within a few levels of each other and look identical. On
- *            saturated colour they separate dramatically. Pure red, for
- *            instance, becomes 85 by Average, 54 by Luminosity and 127 by
- *            Lightness. The chart is what makes the difference visible.
- *
- *  Author : Clyde
- * ============================================================================
- */
+// Suriin ang outputs
 public final class SelfTest {
 
     private static int passed;
@@ -54,7 +25,7 @@ public final class SelfTest {
     }
 
     public static void main(String[] args) throws IOException {
-        /* No window is ever opened here, so say so and let it run anywhere. */
+        /* Walang bubuksang window */
         System.setProperty("java.awt.headless", "true");
 
         System.out.println("==================================================");
@@ -81,20 +52,8 @@ public final class SelfTest {
         System.out.println(" ALL CHECKS PASSED");
     }
 
-    /* ===================== 1. THE THREE FORMULAS ============================ */
 
-    /**
-     * Values worked out by hand for the pixel (200, 100, 50):
-     * <pre>
-     *   Average    = (200 + 100 + 50) / 3          = 350 / 3   = 116 (truncated)
-     *   Luminosity = (21*200 + 72*100 + 7*50 + 50) / 100
-     *              = (4200 + 7200 + 350 + 50) / 100 = 11800/100 = 118
-     *   Lightness  = (max 200 + min 50) / 2        = 250 / 2    = 125
-     * </pre>
-     * Three different answers from the same pixel, which is the point: it
-     * proves the three methods are genuinely doing different things and not
-     * quietly running the same code.
-     */
+    /* Manwal na resulta */
     private static void checkGrayscaleFormulas() {
         section("THE THREE FORMULAS, against values worked out by hand");
 
@@ -102,28 +61,23 @@ public final class SelfTest {
         check("Luminosity of (200,100,50)", 118, GrayscaleMethod.LUMINOSITY.toGray(200, 100, 50));
         check("Lightness  of (200,100,50)", 125, GrayscaleMethod.LIGHTNESS.toGray(200, 100, 50));
 
-        /* Pure red separates the methods even more sharply. */
+        /* Purong pulang pixel */
         check("Average    of (255,0,0)", 85, GrayscaleMethod.AVERAGE.toGray(255, 0, 0));
         check("Luminosity of (255,0,0)", 54, GrayscaleMethod.LUMINOSITY.toGray(255, 0, 0));
         check("Lightness  of (255,0,0)", 127, GrayscaleMethod.LIGHTNESS.toGray(255, 0, 0));
 
-        /* Pure green is where the Luminosity weighting shows its purpose:
-           we see green strongly, so it converts to a much lighter grey. */
+        /* Purong berdeng pixel */
         check("Average    of (0,255,0)", 85, GrayscaleMethod.AVERAGE.toGray(0, 255, 0));
         check("Luminosity of (0,255,0)", 184, GrayscaleMethod.LUMINOSITY.toGray(0, 255, 0));
         check("Lightness  of (0,255,0)", 127, GrayscaleMethod.LIGHTNESS.toGray(0, 255, 0));
 
-        /* Pure blue, the channel the eye is least sensitive to. */
+        /* Purong asul pixel */
         check("Average    of (0,0,255)", 85, GrayscaleMethod.AVERAGE.toGray(0, 0, 255));
         check("Luminosity of (0,0,255)", 18, GrayscaleMethod.LUMINOSITY.toGray(0, 0, 255));
         check("Lightness  of (0,0,255)", 127, GrayscaleMethod.LIGHTNESS.toGray(0, 0, 255));
     }
 
-    /**
-     * Backs the claim made in GrayscaleMethod that no clamping is needed
-     * anywhere. If every method maps black to 0 and white to 255, then no
-     * method can produce a value outside 0..255 for anything in between.
-     */
+    /* Saklaw ng grayscale */
     private static void checkBoundsAndNeutrality() {
         section("BOUNDS AND NEUTRALITY, the reason there is no clamping code");
 
@@ -140,46 +94,37 @@ public final class SelfTest {
                 "isConversion() should be false");
     }
 
-    /* ========================== 2. THE FLIPS =============================== */
 
     private static void checkFlips() {
         section("FLIPS");
 
-        /* A 3 x 2 image of distinct colours, so any pixel that moves to the
-           wrong place is immediately obvious.
-
-               A B C
-               D E F                                                          */
+        /* Iba-ibang kulay */
         BufferedImage src = gridImage();
 
         BufferedImage h = ImageOps.flipHorizontal(src);
         BufferedImage v = ImageOps.flipVertical(src);
 
-        /* Horizontal flip: rows stay put, columns reverse.  C B A / F E D    */
+        /* Baliktarin bawat hanay */
         check("flipH moves (0,0) to (2,0)", src.getRGB(0, 0), h.getRGB(2, 0));
         check("flipH keeps row 0 in row 0", src.getRGB(1, 0), h.getRGB(1, 0));
         check("flipH moves (0,1) to (2,1)", src.getRGB(0, 1), h.getRGB(2, 1));
 
-        /* Vertical flip: columns stay put, rows reverse.    D E F / A B C    */
+        /* Baliktarin mga hanay */
         check("flipV moves (0,0) to (0,1)", src.getRGB(0, 0), v.getRGB(0, 1));
         check("flipV keeps column 1 in column 1", src.getRGB(1, 0), v.getRGB(1, 1));
 
-        /* Flipping twice must land back exactly where it started. This is the
-           property the whole non-destructive model leans on, since it is what
-           lets the same button also undo the flip.                           */
+        /* Dobleng flip */
         check("flipH twice returns the original",
                 identical(src, ImageOps.flipHorizontal(h)), "involution failed");
         check("flipV twice returns the original",
                 identical(src, ImageOps.flipVertical(v)), "involution failed");
 
-        /* Both flips together are a 180 degree rotation: every pixel ends up
-           diagonally opposite where it began.                                */
+        /* Parehong flip */
         BufferedImage both = ImageOps.flipVertical(ImageOps.flipHorizontal(src));
         check("flipH then flipV is a 180 degree rotation",
                 identical(both, rotate180(src)), "combination failed");
 
-        /* The two flips are independent of each other, so their order cannot
-           change the result.                                                  */
+        /* Magkahiwalay na flips */
         check("flip order does not matter",
                 identical(both, ImageOps.flipHorizontal(ImageOps.flipVertical(src))),
                 "H then V differed from V then H");
@@ -189,7 +134,6 @@ public final class SelfTest {
                 "dimensions changed");
     }
 
-    /* ==================== 3. WHOLE-IMAGE BEHAVIOUR ========================= */
 
     private static void checkImageLevelBehaviour() {
         section("WHOLE-IMAGE BEHAVIOUR");
@@ -211,10 +155,7 @@ public final class SelfTest {
                 identical(src, ImageOps.toGrayscale(src, GrayscaleMethod.NONE)),
                 "NONE altered the image");
 
-        /* The recipe model in action. Selecting Average and then Luminosity
-           must give exactly the Luminosity of the ORIGINAL colours. A
-           destructive program would be running Luminosity over pixels that are
-           already grey, and would get a different, wrong answer.              */
+        /* Original ang base */
         ImageDocument doc = new ImageDocument(src, "grid.png");
         doc.setGrayscale(GrayscaleMethod.AVERAGE);
         doc.render();
@@ -240,14 +181,8 @@ public final class SelfTest {
                 "got " + doc.suggestedFileName("png"));
     }
 
-    /* ==================== 4. SAVE FILE NAMING ============================== */
 
-    /**
-     * The save path decides the output format from the filename the user typed,
-     * falling back to the format chosen in the dialog. It is easy to get wrong
-     * and the rest of the save path needs a file dialog, so the pure parts are
-     * checked here.
-     */
+    /* Suriin ang filename */
     private static void checkSaveFileNaming() {
         section("SAVE FILE NAMING");
 
@@ -263,14 +198,12 @@ public final class SelfTest {
                 "beach.PNG".equals(SaveFileNaming.withExtension(new File("beach.PNG"), "jpg").getName()),
                 "a capitalised extension was not recognised");
 
-        /* A dot in the middle of a name is not an extension we write, so the
-           real one still has to be appended. */
+        /* Dagdagan tamang extension */
         check("a dotted name still gains a real extension",
                 "my.photo.png".equals(SaveFileNaming.withExtension(new File("my.photo"), "png").getName()),
                 "got " + SaveFileNaming.withExtension(new File("my.photo"), "png").getName());
 
-        /* Only PNG and JPG can be written, so an unsupported extension the user
-           typed must not be mistaken for a format request. */
+        /* Format na suportado */
         check("an unwritable extension does not become the format",
                 "photo.gif.png".equals(SaveFileNaming.withExtension(new File("photo.gif"), "png").getName()),
                 "got " + SaveFileNaming.withExtension(new File("photo.gif"), "png").getName());
@@ -288,20 +221,12 @@ public final class SelfTest {
         check("png is not JPEG", !SaveFileNaming.isJpeg("png"), "wrongly treated as JPEG");
     }
 
-    /* ======================== 5. SCALING =================================== */
 
-    /**
-     * The preview shrinks large images by halving repeatedly rather than in one
-     * step. Two things have to hold: the right number of halvings, and exact
-     * proportions all the way down. A clamp applied to one side and not the
-     * other would stretch the picture, which is the kind of fault that is
-     * obvious on a circle and invisible on a photograph.
-     */
+    /* Suriin ang sukat */
     private static void checkScaling() {
         section("SCALING");
 
-        /* 4000x3000 down to 800x600: halve to 2000x1500, then to 1000x750,
-           which is within 2x of the target, so two halvings. */
+        /* Dalawang paghahati */
         check("halvings for 4000x3000 into 800x600", 2,
                 ImageScaler.halvingsFor(4000, 3000, 800, 600));
 
@@ -326,8 +251,7 @@ public final class SelfTest {
         check("halving zero times returns the source untouched",
                 ImageScaler.halve(wide, 0) == wide, "a needless copy was made");
 
-        /* A single pixel must survive rather than collapse to a zero-sized
-           image, which would throw inside BufferedImage. */
+        /* Panatilihin isang pixel */
         BufferedImage tiny = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         BufferedImage halvedTiny = ImageScaler.halve(tiny, 3);
         check("halving never produces a zero-sized image",
@@ -335,14 +259,8 @@ public final class SelfTest {
                 "got " + halvedTiny.getWidth() + "x" + halvedTiny.getHeight());
     }
 
-    /* ====================== 6. PROOF IMAGES ================================ */
 
-    /**
-     * Writes the colour chart and one output per operation. These are the
-     * images to show alongside the code, and they are produced by the same
-     * functions the GUI calls, so they cannot drift away from what the program
-     * actually does.
-     */
+    /* Gumawa ng samples */
     private static void writeProofImages() throws IOException {
         section("PROOF IMAGES");
 
@@ -361,24 +279,19 @@ public final class SelfTest {
         save(ImageOps.flipVertical(ImageOps.flipHorizontal(chart)),   "outputs/06_flip_both_180.png");
     }
 
-    /* ---------------------- image fixtures ---------------------------------- */
 
-    /** A 3 x 2 image of six distinct, partly transparent colours. */
+    /* Mga sample pixel */
     private static BufferedImage gridImage() {
         int[] colours = {
-                0xFFFF0000, 0xFF00FF00, 0xFF0000FF,   // row 0: red, green, blue
-                0x80FFFF00, 0xC000FFFF, 0x40FF00FF    // row 1: varied alpha too
+                0xFFFF0000, 0xFF00FF00, 0xFF0000FF,   // Unang hanay
+                0x80FFFF00, 0xC000FFFF, 0x40FF00FF    // Pangalawang hanay
         };
         BufferedImage img = new BufferedImage(3, 2, BufferedImage.TYPE_INT_ARGB);
         img.setRGB(0, 0, 3, 2, colours, 0, 3);
         return img;
     }
 
-    /**
-     * The demo chart: saturated colours on top, muted real-world colours in the
-     * middle, a black to white ramp underneath. Saturated colour is where the
-     * three methods disagree most, which is exactly what needs to be visible.
-     */
+    /* Chart ng kulay */
     private static BufferedImage colourChart() {
         final int cols = 6, swatch = 120, rows = 2, ramp = 70, labelBand = 26;
         final int w = cols * swatch;
@@ -404,8 +317,7 @@ public final class SelfTest {
             paintSwatch(g, muted[i], i * swatch, swatch, swatch, swatch, labelBand);
         }
 
-        /* Black to white ramp: the one place all three methods agree, which
-           makes it a useful control strip next to the swatches. */
+        /* Black-white na gradient */
         for (int x = 0; x < w; x++) {
             g.setColor(new Color(x * 255 / (w - 1), x * 255 / (w - 1), x * 255 / (w - 1)));
             g.fillRect(x, rows * swatch, 1, ramp);
@@ -415,21 +327,18 @@ public final class SelfTest {
         return img;
     }
 
-    /** Fills one swatch and prints its RGB triplet in a readable contrast. */
+    /* Kulayan ang swatch */
     private static void paintSwatch(Graphics2D g, Color c, int x, int y, int w, int h, int band) {
         g.setColor(c);
         g.fillRect(x, y, w, h);
 
-        /* Pick black or white text by the swatch's own luminosity, so the
-           label stays readable on every colour. Using the program's own
-           formula here is a small, honest reuse. */
+        /* Malinaw na label */
         int grey = GrayscaleMethod.LUMINOSITY.toGray(c.getRed(), c.getGreen(), c.getBlue());
         g.setColor(grey > 140 ? Color.BLACK : Color.WHITE);
         g.drawString(String.format("R%d G%d B%d", c.getRed(), c.getGreen(), c.getBlue()),
                 x + 8, y + h - band + 4);
     }
 
-    /* ---------------------- assertions and helpers -------------------------- */
 
     private static void check(String name, int expected, int actual) {
         boolean ok = expected == actual;
@@ -459,7 +368,7 @@ public final class SelfTest {
         return String.format("%-10s", s);
     }
 
-    /** True when two images have the same size and the same pixel at every position. */
+    /* Ihambing bawat pixel */
     private static boolean identical(BufferedImage a, BufferedImage b) {
         if (a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight()) {
             return false;
@@ -474,7 +383,7 @@ public final class SelfTest {
         return true;
     }
 
-    /** Reference 180 degree rotation, written independently of ImageOps. */
+    /* Kalahating ikot */
     private static BufferedImage rotate180(BufferedImage src) {
         int w = src.getWidth(), h = src.getHeight();
         BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);

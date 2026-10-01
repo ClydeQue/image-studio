@@ -6,24 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 
-/**
- * ============================================================================
- *  WrapLayout
- *  ---------------------------------------------------------------------------
- *  PURPOSE : A FlowLayout that reports its real height once it wraps, so the
- *            toolbar grows to a second row on a narrow window instead of
- *            running off the right edge.
- *
- *  WHY IT IS NEEDED
- *            A plain FlowLayout already places components on new rows, but its
- *            preferred size still claims ONE row. The window then gives it one
- *            row of height and everything that wrapped is cut off. This class
- *            recomputes the preferred size by laying the components out
- *            against the container's current width, row by row.
- *
- *  Author : Clyde
- * ============================================================================
- */
+// Paglipat ng hanay
 @SuppressWarnings("serial")
 final class WrapLayout extends FlowLayout {
 
@@ -41,13 +24,10 @@ final class WrapLayout extends FlowLayout {
         return layoutSize(target, false);
     }
 
-    /**
-     * Walks the components left to right, starting a new row whenever the next
-     * one would pass the available width, and adds up the row heights.
-     */
+    /* Sukatin bawat row */
     private Dimension layoutSize(Container target, boolean preferred) {
         synchronized (target.getTreeLock()) {
-            // Before the first layout the width is still 0, so allow one long row.
+            // Unang layout muna
             int targetWidth = target.getWidth();
             if (targetWidth == 0) {
                 targetWidth = Integer.MAX_VALUE;
@@ -67,7 +47,7 @@ final class WrapLayout extends FlowLayout {
                 Dimension d = preferred ? c.getPreferredSize() : c.getMinimumSize();
 
                 if (rowWidth > 0 && rowWidth + getHgap() + d.width > maxWidth) {
-                    addRow(total, rowWidth, rowHeight);   // this one starts a new row
+                    addRow(total, rowWidth, rowHeight);   // Bagong hanay ito
                     rowWidth = 0;
                     rowHeight = 0;
                 }

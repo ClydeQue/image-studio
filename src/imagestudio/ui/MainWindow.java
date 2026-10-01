@@ -12,32 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-/**
- * ============================================================================
- *  MainWindow
- *  ---------------------------------------------------------------------------
- *  PURPOSE : Assembles the window out of the parts and keeps them in step.
- *            That is all it does.
- *
- *            The operations live in StudioController, the menu and toolbar are
- *            built by their own factories, the drawing is in the preview panel
- *            and its painter, and the readout is the status bar's business.
- *            This class puts them together and forwards what the controller
- *            announces.
- *
- *            Written this way because the alternative, one window class that
- *            holds the document, builds every widget, tracks enabled states
- *            and runs the background worker, grows past what anyone can read
- *            in one sitting and gives every one of those concerns a reason to
- *            tangle with the others.
- *
- *  Declared final so calling JFrame's methods from the constructor is safe:
- *  with no possible subclass there is no half-built subclass for 'this' to
- *  escape into.
- *
- *  Author : Clyde
- * ============================================================================
- */
+// Buuin ang window
 @SuppressWarnings("serial")
 public final class MainWindow extends JFrame implements StudioController.Listener {
 
@@ -63,31 +38,24 @@ public final class MainWindow extends JFrame implements StudioController.Listene
         preview.addPropertyChangeListener("zoomLabel", event -> refreshStatus());
         installCompareKeyBinding();
 
-        stateChanged();                          // start with everything in step
-        // Lets the macOS green title bar button enter full screen. Ignored elsewhere.
+        stateChanged();                          // Isabay ang controls
+        // Buong macOS screen
         getRootPane().putClientProperty("apple.awt.fullscreenable", true);
 
         setSize(1200, 760);
-        setMinimumSize(new Dimension(640, 480));   // the toolbar wraps, so it can go narrow
+        setMinimumSize(new Dimension(640, 480));   // Kasya kahit makitid
         setLocationRelativeTo(null);
     }
 
-    /**
-     * Opens a file directly, without going through the chooser.
-     * <p>
-     * Used by the optional command line argument, so
-     * {@code java -cp classes imagestudio.ImageStudio photo.png} opens that
-     * photo straight away.
-     */
+    /* Direktang pagbukas */
     public void openFile(File file) {
         controller.openFile(file);
     }
 
-    /* ====================== CONTROLLER CALLBACKS =========================== */
 
     @Override
     public void documentOpened() {
-        setTitle(APP_NAME + " - " + controller.document().sourceName());
+        setTitle(APP_NAME + " - " + controller.imageInfo().sourceName());
         preview.setFitToWindow(true);
     }
 
@@ -106,7 +74,6 @@ public final class MainWindow extends JFrame implements StudioController.Listene
         statusBar.update(controller, preview.zoomLabel());
     }
 
-    /* ============================ ASSEMBLY ================================= */
 
     private JScrollPane previewArea() {
         JScrollPane scroller = new JScrollPane(preview);
@@ -115,11 +82,7 @@ public final class MainWindow extends JFrame implements StudioController.Listene
         return scroller;
     }
 
-    /**
-     * The space bar does what the Compare button does, for anyone working from
-     * the keyboard. It needs separate press and release bindings because a
-     * hold is two events, not one.
-     */
+    /* Space para compare */
     private void installCompareKeyBinding() {
         JComponent root = getRootPane();
         root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)

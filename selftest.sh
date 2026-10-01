@@ -1,6 +1,5 @@
 #!/bin/sh
-# Compiles and runs the verification harness. Prints a PASS / FAIL table and
-# regenerates test-images/color-chart.png plus everything in outputs/.
+# Suriin ang app
 set -e
 cd "$(dirname "$0")"
 mkdir -p classes

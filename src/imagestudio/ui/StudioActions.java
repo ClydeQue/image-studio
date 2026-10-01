@@ -11,26 +11,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
 
-/**
- * ============================================================================
- *  StudioActions
- *  ---------------------------------------------------------------------------
- *  PURPOSE : The commands that appear in more than one place, built once.
- *
- *            A Swing Action carries its own name, tooltip, mnemonic, keyboard
- *            shortcut and enabled state. Handing the same Action to a menu
- *            item and to a toolbar button means the two cannot drift apart,
- *            and disabling it disables both at once. That is why Import, Save
- *            and the view commands are Actions, while the per-method controls
- *            are built directly by the factories: a radio group needs a
- *            control per method, not a shared one.
- *
- *  Author : Clyde
- * ============================================================================
- */
+// Mga shared command
 final class StudioActions {
 
-    /** Cmd on macOS, Ctrl on Windows and Linux. Never hardcode one of them. */
+    /* Shortcut ng platform */
     private static final int MENU_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
     final Action importImage;
@@ -89,7 +73,7 @@ final class StudioActions {
         about = build("About Image Studio...", "What this program is and how it works",
                 KeyEvent.VK_B, null, e -> HelpDialogs.showAbout(owner));
 
-        /* Enablement is decided in one place, so register what depends on what. */
+        /* Irehistro ang dependencies */
         bindings.bindActionNeedsSavable(save);
         bindings.bindActionNeedsModification(reset);
         bindings.bindActionNeedsImage(fit);
@@ -98,10 +82,7 @@ final class StudioActions {
         bindings.bindActionNeedsImage(zoomOut);
     }
 
-    /**
-     * The usual full screen shortcut for the platform: Ctrl+Cmd+F on macOS,
-     * the way every Mac app does it, and F11 on Windows and Linux.
-     */
+    /* Shortcut sa fullscreen */
     private static KeyStroke fullScreenKey() {
         boolean mac = System.getProperty("os.name", "").toLowerCase().contains("mac");
         return mac
@@ -109,13 +90,7 @@ final class StudioActions {
                 : KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0);
     }
 
-    /**
-     * Switches the window in and out of full screen.
-     * <p>
-     * True full screen hands the whole monitor to the window. Some systems,
-     * such as a remote desktop or a headless test, do not support it, so there
-     * the window is maximised instead, which is the closest thing available.
-     */
+    /* Buong screen mode */
     private static void toggleFullScreen(Window window) {
         GraphicsDevice screen = window.getGraphicsConfiguration().getDevice();
         if (screen.isFullScreenSupported()) {
